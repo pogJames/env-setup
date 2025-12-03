@@ -107,6 +107,12 @@ git config --global credential.https://dev.azure.com.useHttpPath true
 # Azure DevOps Integration: Agile Software Development
 Think of Agile as a way of working where teams deliver value in small, frequent increments, continuously improving as they go
 
+## Agile Values
+1. **Individuals & interactions** over processes & tools
+2. **Working software** over comprehensive documentation
+3. **Customer collaboration** over contract negotiation
+4. **Responding to change** over following a plan
+
 ## The Agile Workflow
 
 ### 1. Sprint Planning (start of sprint)
@@ -114,13 +120,14 @@ The team decides:
 - What work to bring into the next 1–2 week sprint
 - How the work will be done
 - Who will take what tasks
-
+  
 ### 2. Daily Standup (every morning)
+
 You answer three things:
 - What you did yesterday
 - What you’re doing today
 - If anything is blocking you
-
+  
 *Tip: Keep answers short — 30 seconds is ideal*
 
 ### 3. Work, collaborate, push code (during the sprint)
@@ -164,9 +171,3 @@ This is how work moves from idea → code → deploy.
 6. Merge once approved
 7. Deployment pipeline handles release
 8. Move your story/task to Done
-
-## Agile Values
-1. **Individuals & interactions** over processes & tools
-2. **Working software** over comprehensive documentation
-3. **Customer collaboration** over contract negotiation
-4. **Responding to change** over following a plan

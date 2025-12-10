@@ -75,16 +75,13 @@ db1.lock().unwrap().host = "192.168.1.100".into();
 println!("{}", db2.lock().unwrap().host);  // "192.168.1.100"
 ```
 
-### Usage
-**General:**
-- Application configuration ensuring one settings object across the system
-- Logging where all parts write to the same log
-- Cache management with a single shared storage
-
-**IoT:**
-- Modbus Master per process since only one can control the bus at a time
-- Shared MQTT client pooling connections to avoid overhead
-- Hardware bus controllers where I2C or SPI needs exclusive access
+### Usage 
+**General** 
+- Global logger
+- Configuration manager
+**Technical**
+- One Modbus Master per process
+- Shared MQTT client or cloud connection pool
 
 ---
 

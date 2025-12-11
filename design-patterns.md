@@ -810,131 +810,134 @@ temp_sensor.value = 26.3   # both functions run instantly
 ---
 
 ## State
-### Problem
-An object needs to act very differently depending on what “mode” or “state” it’s in right now, and switching modes changes everything about how it works.
-> Example: a smart lock is “locked” (won’t open), “unlocked” (opens easily), or “alarming” (calls police) — and it switches between these based on events.
-### Solution
-Make each state its own small class. The main object keeps a reference to “the current state” and asks it to handle everything. When the state changes, swap the reference.
+
+### Problem  
+An object’s behavior changes completely depending on its current situation (its “state”), and trying to handle all of this with lots of `if/else` statements makes the code huge, messy, and easy to break.  
+> Real example: a smart coffee machine can be “off”, “heating”, “ready”, “brewing”, or “cleaning”. What happens when you press “brew” is totally different in each case — sometimes it starts, sometimes it ignores you, sometimes it says “please wait”.
+
+### Solution  
+Turn every possible state into its own small class. The main object always holds exactly one state object and forwards every request to it. When the situation changes, just replace the current state object with a new one — behavior changes instantly and cleanly.
+
 ```python
-Pythonclass SmartLock:
+class VendingMachine:
     def __init__(self):
-        self.state = LockedState()   # starts locked
+        self.state = NoCoinState()   # starts here
     
-    def handle_key(self):
-        self.state = self.state.handle_key(self)   # ask current state what to do
+    def insert_coin(self):
+        self.state = self.state.insert_coin(self)
     
-    def handle_tamper(self):
-        self.state = self.state.handle_tamper(self)   # state decides
+    def press_button(self):
+        self.state = self.state.press_button(self)
 
-class LockState:
-    def handle_key(self, lock): ...
-    def handle_tamper(self, lock): ...
+class MachineState:
+    def insert_coin(self, machine): ...
+    def press_button(self, machine): ...
 
-class LockedState(LockState):
-    def handle_key(self, lock): print("Unlocked!"); return UnlockedState()
-    def handle_tamper(self, lock): print("Alarm!"); return AlarmingState()
+class NoCoinState(MachineState):
+    def insert_coin(self, machine):  print("Coin accepted"); return HasCoinState()
+    def press_button(self, machine): print("Insert coin first")
 
-class UnlockedState(LockState):
-    def handle_key(self, lock): print("Locked again"); return LockedState()
-    def handle_tamper(self, lock): print("Already open – no alarm")
-
-class AlarmingState(LockState):
-    def handle_key(self, lock): print("Alarm off, unlocked"); return UnlockedState()
-    def handle_tamper(self, lock): print("Already alarming!")
-
-# Usage
-lock = SmartLock()
-lock.handle_tamper()   # Alarm!
-lock.handle_key()      # Alarm off, unlocked
+class HasCoinState(MachineState):
+    def insert_coin(self, machine):  print("Already has coin")
+    def press_button(self, machine): print("Dispensing..."); return NoCoinState()
 ```
 
-### Usage
-- Vending machine modes (idle / paid / dispensing)
-- Device states (booting / running / sleeping)
-- Game character modes (idle / running / jumping)
+### Usage (very common in real systems)
+- Device lifecycle (sleeping / connecting / idle / error)  
+- Order processing (pending / paid / shipped / delivered)  
+- Game characters (idle / walking / attacking / dead)
 
 ---
 
 ## Command
 
 ### Problem  
-You need to represent “do this action” as something you can save, delay, queue, undo, or send over the network.  
-> Example: every button on a smart-home remote must remember exactly what it should do when pressed.
+You need to treat actions like real things: save them, delay them, put them in a queue, undo them, or send them over the network — something you simply can’t do if the action is just a normal method call.  
+> Real example: a TV remote doesn’t call `turn_on()` immediately when you press the button — it creates a “turn TV on” command and sends it wirelessly. The TV later executes it.
 
 ### Solution  
-Turn each action into its own tiny object that knows everything needed to perform it.
+Package each action as a small object that contains everything needed to perform it later (which object, which method, what parameters). These objects can be stored, scheduled, undone, or transmitted.
 
 ```python
-class Light:
-    def turn_on(self):  print("Light is ON")
-    def turn_off(self): print("Light is OFF")
+class GarageDoor:
+    def up(self):    print("Door going UP")
+    def down(self):  print("Door going DOWN")
 
 class Command:
     def execute(self): ...
 
-class TurnOn(Command):
-    def __init__(self, light): self.light = light
-    def execute(self): self.light.turn_on()
+class DoorUpCommand(Command):
+    def __init__(self, door): self.door = door
+    def execute(self): self.door.up()
 
-class TurnOff(Command):
-    def __init__(self, light): self.light = light
-    def execute(self): self.light.turn_off()
+class DoorDownCommand(Command):
+    def __init__(self, door): self.door = door
+    def execute(self): self.door.down()
 
-class RemoteButton:
-    def __init__(self): self.command = None
-    def set_command(self, cmd): self.command = cmd
-    def press(self):
-        if self.command: self.command.execute()
+class RemoteControl:
+    def __init__(self):
+        self.slots = [None] * 4
+    def set_command(self, slot, command):
+        self.slots[slot] = command
+    def press(self, slot):
+        if self.slots[slot]:
+            self.slots[slot].execute()   # can be now, in 5 seconds, or tomorrow
 
 # Usage
-light = Light()
-button = RemoteButton()
-button.set_command(TurnOn(light))
-button.press()   # Light is ON
-button.set_command(TurnOff(light))
-button.press()   # Light is OFF
+door = GarageDoor()
+remote = RemoteControl()
+remote.set_command(0, DoorUpCommand(door))
+remote.set_command(1, DoorDownCommand(door))
+
+remote.press(0)   # Door going UP (can be delayed or sent over BLE)
 ```
 
-### Usage
-- Physical or touchscreen remote controls  
-- Undo/redo in editors  
-- Queuing commands when device is offline
+### Usage (you’ll see this everywhere)
+- Smart-home buttons and voice commands  
+- Undo/redo in any editor  
+- Job queues and scheduled tasks  
+- Replayable logs for debugging
 
 ---
 
 ## Template Method
 
 ### Problem  
-You have a process that always follows the same big steps, but a few of those steps are done differently depending on the device or file type.  
-> Example: every firmware update does connect → erase → write → verify → reboot, but the erase and write steps are different for each chip family.
+You have a multi-step process that is almost identical in many situations, but 1–2 steps are done differently each time. Copy-pasting the whole process just to change one line is wasteful and error-prone.  
+> Real example: every device in a factory must be updated with new firmware: connect → erase flash → write new image → verify → reboot. Only erase/write/verify differ between STM32, ESP32, and nRF52.
 
 ### Solution  
-Write the fixed steps once in a parent class. Leave the steps that change as empty methods that each child class must fill in.
+Write the full process once in a base class with the fixed steps. Mark the steps that change as “must be implemented by child”. Each specific device only fills in its own versions — the main flow stays exactly the same and bug-free.
 
 ```python
-class FirmwareFlasher:
-    def flash(self):
+class FirmwareUpdater:
+    def update(self):
         self.connect()
-        self.erase()
-        self.write()
+        self.backup_settings()
+        self.erase_flash()
+        self.write_new_image()
+        self.restore_settings()
         self.verify()
         self.reboot()
-        print("Flash complete")
+        print("Update successful")
 
-    def connect(self): print("Connected to bootloader")
-    def reboot(self):  print("Device restarted")
+    def connect(self):        print("Connected via USB")
+    def backup_settings(self): print("Settings saved")
+    def restore_settings(self): print("Settings restored")
+    def reboot(self):         print("Device rebooting")
     
-    def erase(self):   ...  # child must implement
-    def write(self):   ...
-    def verify(self):  ...
+    # These three change per chip → force children to implement
+    def erase_flash(self):    raise NotImplementedError
+    def write_new_image(self):raise NotImplementedError
+    def verify(self):        raise NotImplementedError
 
-class Nrf52Flasher(FirmwareFlasher):
-    def erase(self):   print("Erasing all flash")
-    def write(self):   print("Writing via nRF Connect")
-    def verify(self):  print("CRC check OK")
+class Stm32Updater(FirmwareUpdater):
+    def erase_flash(self):    print("STM32: mass erase")
+    def write_new_image(self):print("STM32: page-by-page write")
+    def verify(self):         print("STM32: CRC32 check")
 ```
 
-### Usage
-- Device flashing / provisioning  
-- Data import/export (CSV / JSON / XML)  
-- Test case base class (setup → run → cleanup)
+### Usage (extremely common in industry)
+- Firmware flashing for different MCUs  
+- Exporting data to CSV / JSON / Excel (same headers/footer, different row format)  
+- Test base class (setup → run test → cleanup is always the same)

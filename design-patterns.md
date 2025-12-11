@@ -717,381 +717,263 @@ print(proxy.read())  # Uses existing connection
 - Resource-intensive device initialization
 
 ---
-# BEHAVIORAL PATTERNS – Industry 80/20 Cheat Sheet  
-(Exactly the same format you approved for Creational)
+
+# BEHAVIORAL DESIGN PATTERNS – Industry Reality (Pareto 80/20)
 
 ## Strategy
 
 ### Problem
-You need to swap algorithms or behaviors at runtime, but don’t want giant if/else or switch statements scattered everywhere  
-> Without it: code becomes unmaintainable spaghetti when you add the 5th payment method, compression format, or ML inference backend  
-> Like a Swiss Army knife: same handle, different blades plugged in when needed
+You need to change an object’s behavior/algorithm at runtime without changing its class or polluting it with conditionals.  
+> Adding a new payment method, compression algorithm, or ML inference backend should not require modifying existing classes.  
+> Like a GPS app: same route, but you can switch between “fastest”, “shortest”, or “eco” mode anytime.
 
 ### Solution
-Define a family of algorithms, encapsulate each one, and make them interchangeable:  
-- Strategy interface with a single method (e.g., execute(), process(), infer())  
-- Concrete strategies implement the interface  
-- Context holds a reference to a Strategy and delegates the work  
-> Client configures context with desired strategy at runtime (DI, config, discovery)
+Define a family of algorithms, encapsulate each one in its own class, and make them interchangeable at runtime.  
+> Context holds a reference to a strategy object and delegates the varying part to it.  
+> New strategies can be added without touching existing code (Open/Closed Principle).
 
-### Structure
-| Context       | Strategy         | ConcreteStrategyA/B |
-|:-------------|:-----------------|:--------------------|
-| - strategy   | + execute()      | + execute()         |
-| + set_strategy() |                  |                     |
-| + do_work()   |                  |                     |
-
-```bash
-# do_work()
-return this.strategy.execute(data)
-```
-
-### Code Examples
-
-#### Python
 ```python
 from abc import ABC, abstractmethod
 
-class Compressor(ABC):
+class InferenceStrategy(ABC):
     @abstractmethod
-    def compress(self, data: bytes) -> bytes: ...
+    def run(self, input_data): ...
 
-class GzipCompressor(Compressor):
-    def compress(self, data): return __import__('gzip').compress(data)
+class CpuInference(InferenceStrategy):
+    def run(self, input_data): return "Running on CPU"
 
-class ZlibCompressor(Compressor):
-    def compress(self, data): return __import__('zlib').compress(data)
+class GpuInference(InferenceStrategy):
+    def run(self, input_data): return "Running on GPU (TensorRT)"
 
-class FileHandler:
-    def __init__(self, compressor: Compressor):
-        self.compressor = compressor
+class EdgeInference(InferenceStrategy):
+    def run(self, input_data): return "Running on MCU (TFLite Micro)"
 
-    def save(self, data: bytes):
-        compressed = self.compressor.compress(data)
-        # write to disk...
+class Model:
+    def __init__(self, strategy: InferenceStrategy):
+        self.strategy = strategy
+    
+    def set_strategy(self, strategy: InferenceStrategy):
+        self.strategy = strategy
+    
+    def predict(self, data):
+        return self.strategy.run(data)
+
+# Usage – same model, different backends
+model = Model(CpuInference())
+print(model.predict(None))           # Running on CPU
+model.set_strategy(EdgeInference())
+print(model.predict(None))           # Running on MCU (TFLite Micro)
 ```
 
-#### Rust
-```rust
-trait Compressor {
-    fn compress(&self, data: &[u8]) -> Vec<u8>;
-}
-
-struct GzipCompressor;
-struct ZlibCompressor;
-
-impl Compressor for GzipCompressor {
-    fn compress(&self, data: &[u8]) -> Vec<u8> { /* gzip */ vec![] }
-}
-impl Compressor for ZlibCompressor {
-    fn compress(&self, data: &[u8]) -> Vec<u8> { /* zlib */ vec![] }
-}
-
-struct FileHandler {
-    compressor: Box<dyn Compressor>,
-}
-
-impl FileHandler {
-    fn new(compressor: Box<dyn Compressor>) -> Self {
-        Self { compressor }
-    }
-    fn save(&self, data: &[u8]) {
-        let compressed = self.compressor.compress(data);
-        // write...
-    }
-}
-```
-
-### Usage (most common 80/20)
-**General**  
-- Payment gateways, sorting algorithms, compression  
-**Technical**  
-- ML inference backends (TensorRT vs ONNX vs TFLite)  
-- Modbus/TCP/serial transport selection  
-- Retry/backoff policies
+### Usage (real industry 80/20)
+**General:**  
+- Payment processors  
+- Sorting/compression algorithms  
+- Validation rules  
+**IoT/Embedded:**  
+- Modbus transport (RTU vs TCP vs ASCII)  
+- Sensor fusion algorithms  
+- Power management policies
 
 ---
 
-## Observer (a.k.a. Pub/Sub, Event Bus)
+## Observer (Pub/Sub / Event Bus)
 
 ### Problem
-One object needs to notify many others about state changes, but you don’t want tight coupling  
-> Without it: direct method calls everywhere → impossible to add/remove listeners later  
-> Like YouTube: you subscribe to a channel, get notified on new video — channel doesn’t know who you are
+An object must notify multiple dependent objects when its state changes, without hard-coding who they are.  
+> Tight coupling makes it impossible to add or remove listeners later.  
+> Like a stock price: many charts, phones, and trading bots need to react instantly.
 
 ### Solution
-Define one-to-many dependency:  
-- Subject maintains list of observers  
-- Observers implement update()  
-- Subject calls update() on all observers when state changes
+Define a subscription mechanism: subject maintains a list of observers and notifies them automatically.
 
-### Structure
-| Subject           | Observer         |
-|:-----------------|:-----------------|
-| - observers[]     | + update()       |
-| + attach()/detach()|                |
-| + notify()        |                  |
-
-```bash
-# notify()
-for observer in observers { observer.update() }
-```
-
-### Code Examples
-
-#### Python
 ```python
-class Sensor:
+class TemperatureSensor:
     def __init__(self):
         self._observers = []
-        self._temperature = 0
+        self._temp = 0.0
+    
+    def attach(self, observer):
+        self._observers.append(observer)
+    
+    @property
+    def temperature(self):
+        return self._temp
+    @temperature.setter
+    def temperature(self, value):
+        self._temp = value
+        for observer in self._observers:
+            observer.update(value)
 
-    def attach(self, observer): self._observers.append(observer)
-    def temperature(self, temp):
-        self._temperature = temp
-        for obs in self._observers: obs.update(self._temperature)
+class CloudUploader:
+    def update(self, temp): print(f"Uploaded to cloud: {temp}°C")
 
-class Display:
-    def update(self, temp): print(f"Display: {temp}°C")
+class LocalDisplay:
+    def update(self, temp): print(f"Screen: {temp:.1f}°C")
+
+# Usage
+sensor = TemperatureSensor()
+sensor.attach(CloudUploader())
+sensor.attach(LocalDisplay())
+sensor.temperature = 23.7
+# → both observer methods called automatically
 ```
 
-#### Rust
-```rust
-use std::sync::{Arc, Mutex};
-use std::collections::HashMap;
-
-type Observer = Box<dyn Fn(f32) + Send + Sync>;
-
-struct Sensor {
-    observers: Vec<Observer>,
-    temp: f32,
-}
-
-impl Sensor {
-    fn new() -> Self { Self { observers: vec![], temp: 0.0 } }
-    fn attach(&mut self, obs: Observer) { self.observers.push(obs); }
-    fn set_temp(&mut self, t: f32) {
-        self.temp = t;
-        for obs in &self.observers { obs(t); }
-    }
-}
-```
-
-### Usage
-**General**  
-- GUI updates, event systems  
-**Technical**  
+### Usage (real industry 80/20)
+**General:**  
+- GUI frameworks  
+- Event-driven systems  
+**IoT/Embedded:**  
 - MQTT on_message callbacks  
-- Sensor → cloud → dashboard pipelines  
-- Modbus register change notifications
+- Sensor → dashboard → logger pipelines  
+- BLE characteristic notifications
+
+---
+
+## Decorator (Wrapper)
+
+### Problem
+You want to add behavior (logging, retry, caching, metrics) to existing objects dynamically and in any combination.  
+> Subclassing explodes (Logged + Cached + Retried = 8 classes).  
+> Like coffee: you start with espresso, then add milk, sugar, whip — same base, layered features.
+
+### Solution
+Create decorator classes that wrap the original component and add behavior before/after delegating.
+
+```python
+class ModbusClient:
+    def read_holding(self, addr, count=1):
+        print(f"Raw read {addr}")
+        return [42] * count
+
+class RetryDecorator:
+    def __init__(self, client): self.client = client
+    def read_holding(self, addr, count=1):
+        for i in range(3):
+            try:
+                return self.client.read_holding(addr, count)
+            except Exception:
+                if i == 2: raise
+                print(f"Retry {i+1}/3")
+
+class LoggingDecorator:
+    def __init__(self, client): self.client = client
+    def read_holding(self, addr, count=1):
+        print(f"→ read_holding({addr}, {count})")
+        result = self.client.read_holding(addr, count)
+        print(f"← {result}")
+        return result
+
+# Stack them freely
+client = LoggingDecorator(RetryDecorator(ModbusClient()))
+client.read_holding(40001, 5)
+```
+
+### Usage (real industry 80/20)
+**General:**  
+- Middleware stacks (Flask, Django)  
+- Logging, metrics, caching  
+**IoT/Embedded:**  
+- Modbus/TCP retry + timeout + logging  
+- BLE connection with reconnection wrapper
 
 ---
 
 ## Command
 
 ### Problem
-You want to parameterize objects with operations, queue them, undo them, or log them  
-> Without it: you can’t implement undo/redo, macros, or job queues cleanly  
-> Like a restaurant: customer order = command object that chef executes
+You need to parameterize objects with actions, queue them, support undo, or transmit them over network.  
+> GUI buttons, remote controls, and job queues all represent “do something later”.
 
 ### Solution
-Encapsulate a request as an object:  
-- Command interface with execute() (and optional undo())  
-- Concrete commands hold receiver + parameters  
-- Invoker triggers commands (now, later, or queued)
+Turn a request into a standalone object containing everything needed to execute it.
 
-### Structure
-| Command       | ConcreteCommand | Receiver    | Invoker     |
-|:-------------|:---------------|:-----------|:-----------|
-| + execute()   | + execute()    | + action() | + set_command() / run() |
-
-### Code Examples
-
-#### Python
 ```python
-class Light:
-    def on(self): print("Light ON")
-    def off(self): print("Light OFF")
+class Switch:
+    def on(self):  print("Device ON")
+    def off(self): print("Device OFF")
 
 class Command:
     def execute(self): ...
 
-class LightOnCommand(Command):
-    def __init__(self, light): self.light = light
-    def execute(self): self.light.on()
+class TurnOn(Command):
+    def __init__(self, switch, state):
+        self.switch = switch
+        self.state = state
+    def execute(self):
+        if self.state: self.switch.on()
+        else: self.switch.off()
 
 class RemoteControl:
-    def __init__(self): self.command = None
-    def set_command(self, cmd): self.command = cmd
-    def press_button(self): self.command.execute()
+    def __init__(self):
+        self.commands = [None] * 7
+    def set_command(self, slot, cmd):
+        self.commands[slot] = cmd
+    def press(self, slot):
+        if self.commands[slot]:
+            self.commands[slot].execute()
+
+# Usage
+device = Switch()
+remote = RemoteControl()
+remote.set_command(0, TurnOn(device, True))
+remote.set_command(1, TurnOn(device, False))
+remote.press(0)   # Device ON
+remote.press(1)   # Device OFF
 ```
 
-#### Rust
-```rust
-trait Command {
-    fn execute(&self);
-}
-
-struct Light; impl Light { fn on(&self) { println!("Light ON"); } }
-
-struct LightOnCommand { light: Light }
-impl Command for LightOnCommand {
-    fn execute(&self) { self.light.on(); }
-}
-
-struct Remote { command: Option<Box<dyn Command>> }
-impl Remote {
-    fn set_command(&mut self, cmd: Box<dyn Command>) { self.command = Some(cmd); }
-    fn press(&self) { if let Some(ref c) = self.command { c.execute() } }
-}
-```
-
-### Usage
-**General**  
-- Undo/redo, macro recording  
-**Technical**  
-- Job queues, transaction logs  
-- Modbus write sequences with rollback
+### Usage (real industry 80/20)
+**General:**  
+- Undo/redo in editors  
+- Macro recording  
+**IoT/Embedded:**  
+- Remote control panels  
+- Queued device commands (safe shutdown sequences)
 
 ---
 
 ## Template Method
 
 ### Problem
-You have an algorithm with fixed steps, but some steps vary by subclass  
-> Without it: duplicate the whole algorithm for tiny differences  
-> Like cooking recipes: steps are same (prep → cook → serve), but ingredients differ
+You have a multi-step algorithm where most steps are identical, but a few vary between implementations.  
+> Copy-pasting the whole algorithm for tiny differences is error-prone and hard to maintain.
 
 ### Solution
-Define the skeleton in a base class, defer varying steps to abstract methods that subclasses implement
+Define the algorithm skeleton in a base class; make varying steps abstract or hooks that subclasses override.
 
-### Structure
-| AbstractClass             | ConcreteClass       |
-|:-------------------------|:-------------------|
-| + template_method()       | + step2()          |
-| - step1()                 | + step4()          |
-| + abstract step2()        |                    |
-| - step3()                 |                    |
-
-```bash
-# template_method()
-self.step1()
-self.step2()   # implemented by subclass
-self.step3()
-```
-
-### Code Examples
-
-#### Python
 ```python
 from abc import ABC, abstractmethod
 
-class DataParser(ABC):
-    def parse(self):
-        self.open_file()
-        self.extract_data()
-        self.close_file()
-
-    def open_file(self): print("open")
+class FirmwareUpdate(ABC):
+    def perform_update(self):
+        self.connect()
+        self.erase_flash()
+        self.write_firmware()
+        self.verify()
+        self.reboot()
+        print("Update completed")
+    
+    def connect(self): print("Connected via bootloader")
+    def reboot(self):  print("Device rebooted")
+    
     @abstractmethod
-    def extract_data(self): ...
-    def close_file(self): print("close")
+    def erase_flash(self): ...
+    @abstractmethod
+    def write_firmware(self): ...
+    @abstractmethod
+    def verify(self): ...
 
-class CsvParser(DataParser):
-    def extract_data(self): print("parse CSV")
+class Stm32Update(FirmwareUpdate):
+    def erase_flash(self): print("STM32: mass erase")
+    def write_firmware(self): print("STM32: page write")
+    def verify(self): print("STM32: CRC check")
 ```
 
-#### Rust
-```rust
-trait Parser {
-    fn parse(&self) {
-        self.open();
-        self.extract();
-        self.close();
-    }
-    fn open(&self) { println!("open"); }
-    fn extract(&self);
-    fn close(&self) { println!("close"); }
-}
-
-struct JsonParser;
-impl Parser for JsonParser { fn extract(&self) { println!("parse JSON"); } }
-```
-
-### Usage
-**General**  
-- Framework base classes  
-**Technical**  
-- Device drivers (init → configure → run → cleanup)  
-- Test frameworks (setup → test → teardown)
-
+### Usage (real industry 80/20)
+**General:**  
+- Test frameworks (setup → test → teardown)  
+**IoT/Embedded:**  
+- Device provisioning flows  
+- Communication protocol handlers (common framing, different payloads)
 ---
 
-## Decorator (a.k.a. Wrapper)
-
-### Problem
-You want to add responsibilities to objects dynamically without subclass explosion  
-> Without it: 20 subclasses for “logged + cached + encrypted + retry” combinations  
-> Like coffee: espresso → with milk → with sugar → with cream — same base, layers added
-
-### Solution
-Wrap the original object with decorator objects that conform to the same interface and delegate + add behavior
-
-### Structure
-| Component     | ConcreteComponent | Decorator         |
-|:-------------|:-----------------|:-----------------|
-| + operation() | + operation()    | - component       |
-|               |                  | + operation() → component.operation() + extra |
-
-### Code Examples
-
-#### Python
-```python
-class ModbusClient:
-    def read(self, addr): print(f"read {addr}")
-
-class RetryDecorator:
-    def __init__(self, client): self.client = client
-    def read(self, addr):
-        for i in range(3):
-            try:
-                return self.client.read(addr)
-            except: pass
-        raise TimeoutError
-
-# Usage
-client = RetryDecorator(ModbusClient())
-client.read(40001)
-```
-
-#### Rust
-```rust
-trait Modbus {
-    fn read(&self, addr: u16) -> u16;
-}
-
-struct RealModbus;
-impl Modbus for RealModbus { fn read(&self, _: u16) -> u16 { 42 } }
-
-struct RetryModbus<T: Modbus> { inner: T }
-impl<T: Modbus> Modbus for RetryModbus<T> {
-    fn read(&self, addr: u16) -> u16 {
-        for _ in 0..3 {
-            if let Ok(v) = std::panic::catch_unwind(|| self.inner.read(addr)) {
-                return v;
-            }
-        }
-        panic!("timeout");
-    }
-}
-}
-```
-
-### Usage
-**General**  
-- Middleware, logging, caching  
-**Technical**  
-- Retry, timeout, authentication wrappers  
-- Logging Modbus traffic, caching register reads
-
-These five behavioral patterns cover ~85 % of all real-world behavioral pattern usage. The other six (State, Visitor, Mediator, etc.) are <15 % combined. Master these five → you’re golden.

@@ -1,8 +1,10 @@
 # RELATIONAL DATABASE
+
 ### Why:
 1. Data Duplication and Inconsistency
 2. Lack of Relationships and Integrity
 3. Scalability and Querying Issues
+   
 ### How:
 1. Structured Data with Tables
 > Data is organized into tables (relations) with rows (records/tuples) and columns (attributes/fields)
@@ -12,6 +14,29 @@
 > Standardized query language (Structured Query Language)
 4. ACID Properties
 > Atomicity (all or nothing), Consistency (rules enforced), Isolation (concurrent safety), Durability (data survives crashes)
+
+### Core Knowledge:
+1. Data Modelling Basics
+   - Entities & Attributes (Customer -> ID, Name, Address)
+   - Relationships (One-to-Many, Many-to-Many, One-to-One)
+   - Normalization:
+     1. 1NF = atomic values, rows and columns are unique
+     2. 2NF = every non-prime attribute must depend on the entire primary key, not part of it
+     3. 3NF = non-prime attributes must not depend on other non-prime attributes
+2. SQL Fundamentals
+   - DDL (Data Definition Language): Create/Alter tables
+   - DML (Data Manipulation): Insert/Update/Delete/Select
+   - DQL (Queries): JOIN (INNER, LEFT), GROUP BY, HAVING, ORDER BY, indexes for speed
+3. Keys & Constraints
+   - Primary Key: Unique, non-null identifier
+   - Foreign Key: Links tables, references primary keys
+   - Constraints: UNIQUE, NOT NULL, etc.
+5. Transactions & ACID
+   - Atomicity
+   - Consistency
+   - Isolation
+   - Durability
+     
 ### Use Cases
 1. Transactional Systems: 
 - record sales, transfers, listings (E-commerce orders, Banking transfers, Booking systems, Inventory management)\
@@ -34,30 +59,32 @@
 7. Logging & Auditing:
 - record user actions, system events for compliance/debugging (Audit logs, Access logs)
 - audit_logs
-### Core Knowledge:
-1. Data Modelling Basics
-   - Entities & Attributes (Customer -> ID, Name, Address)
-   - Relationships (One-to-Many, Many-to-Many, One-to-One)
-   - Normalization:
-     1. 1NF = atomic values, rows and columns are unique
-     2. 2NF = every non-prime attribute must depend on the entire primary key, not part of it
-     3. 3NF = non-prime attributes must not depend on other non-prime attributes
-2. SQL Fundamentals
-   - DDL (Data Definition Language): Create/Alter tables
-   - DML (Data Manipulation): Insert/Update/Delete/Select
-   - DQL (Queries): JOIN (INNER, LEFT), GROUP BY, HAVING, ORDER BY, indexes for speed
-3. Keys & Constraints
-   - Primary Key: Unique, non-null identifier
-   - Foreign Key: Links tables, references primary keys
-   - Constraints: UNIQUE, NOT NULL, etc.
-5. Transactions & ACID
-   - Atomicity
-   - Consistency
-   - Isolation
-   - Durability
 
-Here are 10 progressive practice questions to help you master writing correct SQL commands. They start simple and build up to more complex scenarios involving multiple tables, joins, constraints, and transactions. Assume a relational database for a small online bookstore.
-Schema (Use this for all questions)
+### SQLITE
+1. Architecture: file-based, serverless
+2. Concurrency: single writer, many readers
+3. Size: tiny (~1MB) super fast for reads
+4. Features: Basic SQL
+5. Deployment: no setup
+- For Embedded Systems and IoT
+- Desktop/Local apps: browser storage, testing environments, single-user tools
+- Mobile Apps: offline data sync in iOS
+When to choose: Low concurrency, no network, small data, zero setup\
+Useful Features: PRAGMA, VACUUM, ATTACH, FTS5 EXTENSION, In-Memory
+
+### PostgreSQL
+1. Architecture: client-server
+2. Concurrency: full multi-user
+3. Size: large (~100MB+) optimized for complex workloads
+4. Features: advanced
+5. Deployment: needs server management
+- Web/enterprise apps: e-commerce sites, SaaS
+- Data Analytics & reporting: financial dashboards, CRM revenue reports
+- Scalable Systems: GIS (Geographic Information System), JSONB for semi-structured data
+When to choose: High traffic, multiple users, advances features like replication, extensions\
+Useful Features: Extensions (pgcrypto, PostGIS, JSONB), Row-Level Security, Truggers/Functions, Partitioning, Replication
+
+## Practice
 ```sql
 SQLCREATE TABLE authors (
     author_id INTEGER PRIMARY KEY,

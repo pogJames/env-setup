@@ -29,10 +29,11 @@
 - manage invoices, payments, ledgers (Billing systems, payroll, expense tracking)
 - core tables: clients, invoices, invoice_items
 6. Configuration & Settings Storage:
-- store app settings, feature flags, user preferences (SaaS configuration)
-- core tables: tenants, 
+- store app settings, feature flags, user preferences (SaaS configuration, multi-tenant apps)
+- core tables: tenants, settings, feature_flags
 7. Logging & Auditing:
 - record user actions, system events for compliance/debugging (Audit logs, Access logs)
+- audit_logs
 ### Core Knowledge:
 1. Data Modelling Basics
    - Entities & Attributes (Customer -> ID, Name, Address)

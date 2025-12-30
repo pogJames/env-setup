@@ -12,6 +12,27 @@
 > Standardized query language (Structured Query Language)
 4. ACID Properties
 > Atomicity (all or nothing), Consistency (rules enforced), Isolation (concurrent safety), Durability (data survives crashes)
+### Use Cases
+1. Transactional Systems: 
+- record sales, transfers, listings (E-commerce orders, Banking transfers, Booking systems, Inventory management)\
+- core tables: customers, products, orders, order_items
+2. User Authentication & Authorization:
+- manage users, roles, sessions (Web apps, Mobile apps, SaaS platforms)\
+- core tables: roles, users, sessions
+3. Content Management & Catalogs:
+- structure products, customers, items (Online stores, Blogs, Product Catalogs)
+- core tables: categories, posts, tags
+4. Customer Relationship Management:
+- track leads, contacts, interactions (Salesforce, support ticketing, sales pipeline)\
+- core tables: companies, contacts, deals, activities
+5. Financial Records & Accounting:
+- manage invoices, payments, ledgers (Billing systems, payroll, expense tracking)
+- core tables: clients, invoices, invoice_items
+6. Configuration & Settings Storage:
+- store app settings, feature flags, user preferences (SaaS configuration)
+- core tables: tenants, 
+7. Logging & Auditing:
+- record user actions, system events for compliance/debugging (Audit logs, Access logs)
 ### Core Knowledge:
 1. Data Modelling Basics
    - Entities & Attributes (Customer -> ID, Name, Address)
@@ -33,7 +54,6 @@
    - Consistency
    - Isolation
    - Durability
-
 
 Here are 10 progressive practice questions to help you master writing correct SQL commands. They start simple and build up to more complex scenarios involving multiple tables, joins, constraints, and transactions. Assume a relational database for a small online bookstore.
 Schema (Use this for all questions)

@@ -1,28 +1,28 @@
 # Non-Relational Database
 ### Problems
-1. The Schema Rigidity Problem
+1. **The Schema Rigidity Problem**
 > Today they send {sensor_id, temperature, timestamp}\
 > Tomorrow you add humidity sensors that send {sensor_id, humidity, temperature, timestamp, battery_level}\
 > The tables have become a mess...
-2. The Scale Problem
+2. **The Scale Problem**
 > SQL databases scale vertically -> you buy bigger servers (But there's a ceiling)\
 > Horizontal scaling (adding more machines) is difficult because of ACID transactions and JOINs
-3. The Impedance Mismatch
+3. **The Impedance Mismatch**
 > Your Python objects and React state are nested, hierarchical structures\
 > Flattening them into normalized tables and reconstructing them with JOINs is so bad
 ### Solution
-1. Schema Flexibility 
+1. **Schema Flexibility** 
 > Store documents as they are, Different documents in the same collection can have different fields. Your sensor data evolves without migrations.
-2. Horizontal Scaling
+2. **Horizontal Scaling**
 > Data is distributed across nodes by design. Need more capacity? Add machines. The database handles sharding automatically.
-3. Data Model Alignment
+3. **Data Model Alignment**
 > Store data the way your application uses it. If your React dashboard needs a sensor with its recent readings, store it that way—no joins required
 
 ### Core Concepts You Must Know
-**CAP Theorem**: You can only guarantee two of three: Consistency, Availability, Partition tolerance. Relational databases prioritize consistency. Most NoSQL systems let you choose—often favoring availability and partition tolerance, accepting "eventual consistency."
-**Eventual Consistency**: After an update, given enough time with no new updates, all replicas will converge to the same value. For your temperature dashboard, showing a reading that's 100ms stale is usually fine.
-**Denormalization**: Instead of normalizing data across tables, you duplicate it to avoid joins. Store the sensor name with every reading, even though it's redundant. Disk is cheap; joins across distributed systems are expensive.
-**Sharding**: Data is split across machines by a shard key. Choose poorly (like sharding by sensor type when 90% are temperature sensors) and you get hot spots. Choose well (sensor_id) and load distributes evenly.
+1. **CAP Theorem**: You can only guarantee two of three: Consistency, Availability, Partition tolerance. Relational databases prioritize consistency. Most NoSQL systems let you choose—often favoring availability and partition tolerance, accepting "eventual consistency."
+2. **Eventual Consistency**: After an update, given enough time with no new updates, all replicas will converge to the same value. For your temperature dashboard, showing a reading that's 100ms stale is usually fine.
+3. **Denormalization**: Instead of normalizing data across tables, you duplicate it to avoid joins. Store the sensor name with every reading, even though it's redundant. Disk is cheap; joins across distributed systems are expensive.
+4. **Sharding**: Data is split across machines by a shard key. Choose poorly (like sharding by sensor type when 90% are temperature sensors) and you get hot spots. Choose well (sensor_id) and load distributes evenly.
 
 ### MongoDB
 ```

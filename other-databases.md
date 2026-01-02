@@ -135,3 +135,4 @@ result = duckdb.sql("""
 """).df()
 ```
 ## Polars
+## Parquet

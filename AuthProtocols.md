@@ -127,10 +127,10 @@ sequenceDiagram
 ```
   
 ## OAuth
-1. Strengths: Secure delegated access without sharing passwords; flexible flows.
-2. Weaknesses: Complex to implement correctly; vulnerable if flows misused.
-3. Opportunities: Foundation for modern API access; evolving standards (e.g., OAuth 2.1).
-4. Threats: Token theft or misconfiguration leaks; phishing for auth codes.
+1. Strengths: Granular access, highly-scalable, and dev friendly (REST-based and lightweight JSON)
+2. Weaknesses: Only for Authz and token thefts
+3. Opportunities: evolving standards
+4. Threats: primary target for bot attacks and phishing evolution
 ```mermaid
 sequenceDiagram
     participant User
@@ -150,10 +150,10 @@ sequenceDiagram
 ```
 
 ## OIDC
-1. Strengths: Adds reliable authentication to OAuth; modern, mobile-friendly; great for "Login with...".
-2. Weaknesses: Still complex; relies on proper HTTPS and token handling.
-3. Opportunities: Preferred for new apps; excellent libraries and support.
-4. Threats: Growing attack surface as adoption increases; potential for ID token forgery if keys compromised.
+1. Strengths: Combines ASML Authn and OAuth mobile-friendly
+2. Weaknesses: Vendor Divergence and Logout complexity
+3. Opportunities: Universal Login and automatic key rotation
+4. Threats: Single point of Failure and Privacy concerns
 ```mermaid
 sequenceDiagram
     participant User
@@ -172,10 +172,10 @@ sequenceDiagram
 ```
 
 ## SAML
-1. Strengths: Robust enterprise SSO; strong security with XML signatures.
-2. Weaknesses: Verbose and complex (XML-heavy); poor for mobile/SPAs.
-3. Opportunities: Still dominant in legacy enterprise environments.
-4. Threats: Being phased out for newer apps; high setup cost drives shift to OIDC.
+1. Strengths: Enterprise standard and strong security
+2. Weaknesses: Complex, heavy, and not mobile-friendly
+3. Opportunities: Remains as gold standard for govtech, fintech, healthcare
+4. Threats: Mordernization to OIDC and high maintenance cost
 ```mermaid
 sequenceDiagram
     participant User
@@ -191,10 +191,10 @@ sequenceDiagram
     SP-->>User: Grant access (session cookie)
 ```
 ## JWT
-1. Strengths: Stateless, compact, self-contained; perfect for APIs and microservices.
-2. Weaknesses: Can't easily revoke without extra systems; size can grow with claims.
-3. Opportunities: Core of modern token-based auth (used in OIDC/OAuth).
-4. Threats: Algorithm confusion attacks or weak keys; no built-in encryption for sensitive data.
+1. Strengths: Stateless, compact, built-in expiration
+2. Weaknesses: Difficult to revoke and token bloat
+3. Opportunities: Edge computing, cross domain and standardized
+4. Threats: Algorithm confusion attacks or weak keys
 ```mermaid
 sequenceDiagram
     participant Client

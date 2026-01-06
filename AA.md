@@ -38,6 +38,8 @@ GET  /users/me          → Current user profile
 4. **Short-lived access tokens** (5-60 min) + refresh tokens
 5. **Document your security** in OpenAPI `securitySchemes`
 
+### [COMMON AUTH ACTIVITIES](https://claude.ai/public/artifacts/1c6a2d56-2309-4c3c-969f-8e36281345df)
+
 ### Summary: Questions to Ask Yourself
 
 When looking at any auth flow, ask:

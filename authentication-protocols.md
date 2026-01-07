@@ -31,9 +31,12 @@
 
 ### SAML (Security Assertion Markup Language) 
 XML-based framework for authentication and authorization between two entities without a password
-> - Exchanges signed "assertions" between Identity Provider (IdP) and Service Provider (SP)
-> - Service provider (SP) agrees to trust the identity provider to authenticate users
-> - Identity provider (IdP) authenticates users and provides to service providers an authentication assertion that indicates a user has been authenticated
+1. The user (Principal) attempts to access a **Service Provider** (e.g., Salesforce).
+2. The **Service Provider** redirects the user to the **Identity Provider** for authentication.
+3. The **Identity Provider** verifies the user's credentials (e.g., username, password, or multifactor authentication).
+4. Upon successful authentication, the **Identity Provider** generates a **SAML Assertion**, an XML document containing authentication and user details.
+5. The **SAML Assertion** is sent back to the **Service Provider**, confirming the user's identity.
+6. The **Service Provider** grants the user access without requiring additional login credentials.
 
 ### JWT (JSON web token) 
 compact and self-contained way for securely transmitting information between parties as a JSON object -> access token

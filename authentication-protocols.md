@@ -12,13 +12,15 @@
 
 ### Adding Security Layers
 **MFA** ~ adds a layer of security during login that requires users to provide more than one credential to prove their digital identity. Factors can be:
-- Something you are - like a biometric
-- Something you know - like a password
-- Something you own - like a device
+1. Something you are - like a biometric
+2. Something you know - like a password
+3. Something you own - like a device
 
 ### Improving UX
 **SSO** ~ authentication mechanism that allows users to access multiple applications and websites using a single set of login credentials
-> When a user attempts to access an application, the application checks if the user has already been authenticated by the SSO solution. If the user is authenticated, they are granted access
+1. Initial Login: You sign in once to a central authentication server (an "identity provider").
+2. Token Issuance: The server verifies you and issues a secure token or certificate.
+3. Seamless Access: When you try to access another connected application, it uses that token to verify you, granting immediate access without asking for a password again
 
 ## Authentication & Authorization Standards
 ### OAuth 2.0 

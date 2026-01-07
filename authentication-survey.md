@@ -1,4 +1,7 @@
-# Auth API Standards
+# Authentication and Authorization
+Authentication ensures a user's identity. Authorization determines if a user can perform a certain action on a particular resource.
+
+For example, when you log in to Google, Authentication is the process of verifying that your username and password are correct. Authorization is the process of ensuring that you can access a given Google service or feature.
 
 ### The Stack Everyone Uses
 ```

@@ -7,25 +7,24 @@
 2. **Form** ~ Login page(username/password submitted via HTML form)
 - Server creates a session (stored on server) and sends a cookie to your browser for future requests
 
-> [!NOTE]
-> These are single-app only — you log in separately for every site/app
-
 ### Adding Security Layers
 **MFA** ~ adds a layer of security during login that requires users to provide more than one credential to prove their digital identity. Factors can be:
-1. Something you are - like a biometric
-2. Something you know - like a password
-3. Something you own - like a device
+- Something you are - like a biometric
+- Something you know - like a password
+- Something you own - like a device
 
 ### Improving UX
 **SSO** ~ authentication mechanism that allows users to access multiple applications and websites using a single set of login credentials
-1. Initial Login: You sign in once to a central authentication server (an "identity provider").
-2. Token Issuance: The server verifies you and issues a secure token or certificate.
-3. Seamless Access: When you try to access another connected application, it uses that token to verify you, granting immediate access without asking for a password again
+- Initial Login: You sign in once to a central authentication server (an "identity provider").
+- Token Issuance: The server verifies you and issues a secure token or certificate.
+- Seamless Access: When you try to access another connected application, it uses that token to verify you, granting immediate access without asking for a password again
 
 ## Authentication & Authorization Standards
 ### OAuth 2.0 
 **Authorization framework**, protocol that allows a user to grant a third-party web site or application access to the user’s protected resources, without necessarily revealing their long-term credentials or even their identity
-> the **client** (Application) requests access to resources controlled by the **resource owner** (End-user) and hosted by the **resource server** and is issued a different set of credentials than those of the resource owner. Instead of using the resource owner’s credentials to access protected resources, the client obtains an **access token** - a string denoting a specific scope, lifetime, and other access attributes. Access tokens are issued to third-party clients by an **authorization server** with the approval of the resource owner. Then the client uses the access token to access the protected resources hosted by the resource server
+1. the **client** (Application) requests access to resources controlled by the **resource owner** (End-user) and hosted by the **resource server**
+2. the client obtains an **access token** - a string denoting a specific scope, lifetime, and other access attributes (which is issued by an **authorization server** with the approval of the resource owner)
+3. the client uses the access token to access the protected resources hosted by the resource server
 
 ### Open ID Connect (IODC)
 **Identity layer** built on top of the OAuth 2.0 framework. It allows third-party applications to verify the identity of the end-user and to obtain basic user profile information using **access tokens**
@@ -42,9 +41,9 @@ XML-based framework for authentication and authorization between two entities wi
 
 ### JWT (JSON web token) 
 compact and self-contained way for securely transmitting information between parties as a JSON object -> access token
-> example token: header.payload.signature
+- encoded: header.payload.signature
 `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNzM2MjY1NjAwLCJleHAiOjE3MzYzNTIwMDAsInJvbGUiOiJhZG1pbiJ9.qL3XzK8fG5vY9pR2mN7jH6tW1bC4xD8uV0eA9sQ7rT`\
-> decoded:
+- decoded:
 ```bash
 # header
 {

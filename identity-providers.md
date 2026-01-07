@@ -1,8 +1,4 @@
-Got it — more breathing room, natural flow, analogies welcome, visuals when helpful.
-
----
-
-## The Root Problem
+# The Root Problem
 
 Imagine a company with 50 different apps — email, file storage, HR system, internal tools. If each app manages its own users, you get:
 

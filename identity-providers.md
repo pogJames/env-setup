@@ -114,3 +114,24 @@ You won't interact with raw LDAP much. It's the foundation that products like Ac
 - Dashboard SSO to all tools.
 
 ## Social IdPs (Google, Microsoft, GitHub, etc.)
+
+**What they are**: Third-party services (Google, Facebook/Meta, Apple, GitHub, etc.) that let users "Login with..." your app using their existing accounts—no new passwords needed.
+
+**Key components**:
+- OAuth 2.0 + OIDC: For secure delegated auth (code flow + ID/access tokens).
+- Scopes: Requested permissions (e.g., email, profile)—user consents.
+- Claims: User data in ID token JWT (sub, email, name).
+
+**Main use cases**:
+- Consumer/B2C apps for fast signup/login.
+- Reducing password fatigue/abandonment.
+- Leveraging provider's MFA/security.
+
+**Quick examples**:
+- "Sign in with Google" → consent screen → app gets email/name via claims.
+- GitHub login for dev tools → scopes for repo access.
+- Apple Sign-In → privacy-focused (hide email option).
+
+**Pros/Cons**: Super convenient, trusted security; but dependency on external providers, limited customization, privacy concerns.
+
+**When to use**: Ideal for public-facing apps wanting quick adoption—combine with your own auth for hybrids.

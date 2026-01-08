@@ -9,3 +9,8 @@
 7. Make documentation
 8. Able to explain everything
 9. Congratulations! now you have learned
+
+# Good Habits
+
+1. Always initialize git version control
+2. Document process and results
